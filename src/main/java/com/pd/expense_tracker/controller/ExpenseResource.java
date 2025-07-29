@@ -25,15 +25,9 @@ public class ExpenseResource {
 
     private final ExpenseFacade expenseFacade;
 
-    private final LocationFacadeImpl locationFacade;
-
-    private final ExchangeRateFacadeImpl exchangeRateFacade;
-
     @Autowired
-    public ExpenseResource(ExpenseFacade expenseFacade, LocationFacadeImpl locationFacade, ExchangeRateFacadeImpl exchangeRateFacade) {
+    public ExpenseResource(ExpenseFacade expenseFacade) {
         this.expenseFacade = expenseFacade;
-        this.locationFacade = locationFacade;
-        this.exchangeRateFacade = exchangeRateFacade;
     }
 
     @Operation(summary = "Get all expense")
@@ -93,20 +87,8 @@ public class ExpenseResource {
             @RequestParam(defaultValue = "103.21.244.1") String ip // demo IP
     ) {
         try{
-        LocationDTO location = locationFacade.getLocation(ip);
-        BigDecimal rate = exchangeRateFacade.getConversionRate(fromCurrency, toCurrency);
-        BigDecimal amount = BigDecimal.valueOf(expense.getAmount());
-        BigDecimal converted = amount.multiply(rate).setScale(2, RoundingMode.HALF_UP);
-
-        ExpenseConversionDTO payload = new ExpenseConversionDTO(
-                amount,
-                fromCurrency,
-                toCurrency,
-                converted,
-                rate,
-                location
-        );
-        return ResponseEntity.ok(payload);
+            ExpenseConversionDTO payload = expenseFacade.convertExpense(expense, fromCurrency, toCurrency, ip);
+            return ResponseEntity.ok(payload);
         } catch (Exception ex) {
             throw new ExpenseConversionException("Failed to execute expense", ex);
         }

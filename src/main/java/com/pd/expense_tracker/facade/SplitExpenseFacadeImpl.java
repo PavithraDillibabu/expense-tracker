@@ -10,12 +10,12 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 @Service
-public class SplitExpenseFacade {
+public class SplitExpenseFacadeImpl {
 
     private final ExpenseSplitRepository expenseSplitRepository;
     private final UserIdentifierRepository userIdentifierRepository;
 
-    public SplitExpenseFacade(ExpenseSplitRepository expenseRepo, UserIdentifierRepository userRepo) {
+    public SplitExpenseFacadeImpl(ExpenseSplitRepository expenseRepo, UserIdentifierRepository userRepo) {
         this.expenseSplitRepository = expenseRepo;
         this.userIdentifierRepository = userRepo;
     }

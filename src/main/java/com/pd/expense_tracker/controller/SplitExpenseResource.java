@@ -1,7 +1,7 @@
 package com.pd.expense_tracker.controller;
 
 import com.pd.expense_tracker.DTO.PaymentDTO;
-import com.pd.expense_tracker.facade.SplitExpenseFacade;
+import com.pd.expense_tracker.facade.SplitExpenseFacadeImpl;
 import com.pd.expense_tracker.model.ExpenseSplit;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,9 +11,9 @@ import java.util.List;
 @RequestMapping("/api/split")
 public class SplitExpenseResource {
 
-    private final SplitExpenseFacade splitExpenseFacade;
+    private final SplitExpenseFacadeImpl splitExpenseFacade;
 
-    public SplitExpenseResource(SplitExpenseFacade splitExpenseFacade) {
+    public SplitExpenseResource(SplitExpenseFacadeImpl splitExpenseFacade) {
         this.splitExpenseFacade = splitExpenseFacade;
     }
 

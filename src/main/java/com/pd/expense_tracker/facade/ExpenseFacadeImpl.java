@@ -1,8 +1,7 @@
 package com.pd.expense_tracker.facade;
 
-import com.pd.expense_tracker.DTO.ExpenseCreatedEventDTO;
-import com.pd.expense_tracker.DTO.ExpenseDTO;
-import com.pd.expense_tracker.DTO.ExpenseEventDTO;
+import com.pd.expense_tracker.DTO.*;
+import com.pd.expense_tracker.exception.ExpenseConversionException;
 import com.pd.expense_tracker.facade.interfaces.ExpenseFacade;
 import com.pd.expense_tracker.mapper.ExpenseMapperImpl;
 import com.pd.expense_tracker.model.Expense;
@@ -14,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -26,11 +27,17 @@ public class ExpenseFacadeImpl implements ExpenseFacade {
 
     private final ExpenseRepository expenseRepository;
 
+    private final LocationFacadeImpl locationFacade;
+
+    private final ExchangeRateFacadeImpl exchangeRateFacade;
+
     private final ApplicationEventPublisher publisher;
 
     @Autowired
-    public ExpenseFacadeImpl(ExpenseRepository expenseRepository, ApplicationEventPublisher publisher) {
+    public ExpenseFacadeImpl(ExpenseRepository expenseRepository, LocationFacadeImpl locationFacade, ExchangeRateFacadeImpl exchangeRateFacade, ApplicationEventPublisher publisher) {
         this.expenseRepository = expenseRepository;
+        this.locationFacade = locationFacade;
+        this.exchangeRateFacade = exchangeRateFacade;
         this.publisher = publisher;
     }
 
@@ -79,5 +86,25 @@ public class ExpenseFacadeImpl implements ExpenseFacade {
         expenseRepository.save(expense);
     }
 
+    @Override
+    public ExpenseConversionDTO convertExpense(Expense expense, String fromCurrency, String toCurrency, String ip) {
+        try {
+            LocationDTO location = locationFacade.getLocation(ip);
+            BigDecimal rate = exchangeRateFacade.getConversionRate(fromCurrency, toCurrency);
+            BigDecimal amount = BigDecimal.valueOf(expense.getAmount());
+            BigDecimal converted = amount.multiply(rate).setScale(2, RoundingMode.HALF_UP);
+
+            return new ExpenseConversionDTO(
+                    amount,
+                    fromCurrency,
+                    toCurrency,
+                    converted,
+                    rate,
+                    location
+            );
+        } catch (Exception ex) {
+            throw new ExpenseConversionException("Failed to execute expense conversion", ex);
+        }
+    }
 
 }

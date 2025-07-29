@@ -1,5 +1,6 @@
 package com.pd.expense_tracker.facade.interfaces;
 
+import com.pd.expense_tracker.DTO.ExpenseConversionDTO;
 import com.pd.expense_tracker.DTO.ExpenseDTO;
 import com.pd.expense_tracker.model.Expense;
 
@@ -14,4 +15,5 @@ public interface ExpenseFacade {
     void update(Long id, Expense expense);
     void delete(Long id);
     List<ExpenseDTO> getExpensesByCategory(String name);
+    ExpenseConversionDTO convertExpense(Expense expense, String fromCurrency, String toCurrency, String ip);
 }
